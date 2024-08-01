@@ -1,31 +1,35 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PinSpawner : MonoBehaviour
 {
+    [FormerlySerializedAs("stageManager")]
     [Header("Commons")] 
     [SerializeField] private StageController stageController;
     [SerializeField] private GameObject pinPrefab;
+    [SerializeField] private GameObject pinIndexTextPrefab;
+    [SerializeField] private Transform textParent;
 
-    [Header("StuckPin")] 
-    [SerializeField] private Transform targetTransform;
-    [SerializeField] private Vector3 targetPosition = Vector3.up * 2;
-    [SerializeField] private float targetRadius = 0.8f;
-    [SerializeField] private float pinLength = 1.5f;
-
+    [Header("Stuck")] 
+    [SerializeField] private Transform target;
+    
     [Header("Throwable")] 
     private List<Pin> _throwablePins;
     private readonly float _bottomAngle = 270;
 
-
     private void Update()
     {
+        if (stageController.IsGameOver == true)
+            return;
+        
         if (Input.GetMouseButtonDown(0) && _throwablePins.Count > 0)
         {
-            AttachStuckPin(_throwablePins[0].transform, _bottomAngle);
+            _throwablePins[0].GetComponent<Pin>().AttachToTarget(target, _bottomAngle);
             _throwablePins.RemoveAt(0);
             
             foreach (Pin pin in _throwablePins)
@@ -41,24 +45,29 @@ public class PinSpawner : MonoBehaviour
         _throwablePins = new List<Pin>();
     }
     
-    public void SpawnThrowablePin(Vector3 position)
+    public void SpawnThrowablePin(Vector3 position, int index)
     {
-        GameObject clone = Instantiate(pinPrefab, position, Quaternion.identity);
-        _throwablePins.Add(clone.GetComponent<Pin>());
-    }
-
-    public void SpawnStuckPin(float angle)
-    {
-        GameObject clone = Instantiate(pinPrefab);
-        AttachStuckPin(clone.transform, angle);
-    }
-
-    private void AttachStuckPin(Transform pin, float angle)
-    {
-        pin.position = Utils.PositionFromAngle(targetRadius + pinLength, angle) + targetPosition;
-        pin.rotation = Quaternion.Euler(0, 0, angle);
-        pin.SetParent(targetTransform);
+        Pin pin = Instantiate(pinPrefab, position, Quaternion.identity).GetComponent<Pin>();
+        pin.Setup(stageController);
+        _throwablePins.Add(pin);
+        SpawnTextUI(pin.transform, index);
         
-        pin.GetComponent<Pin>().OnAttached();
+    }
+
+    public void SpawnStuckPin(float angle, int index)
+    {
+        Pin pin = Instantiate(pinPrefab).GetComponent<Pin>();
+        pin.Setup(stageController);
+        pin.AttachToTarget(target, angle);
+        SpawnTextUI(pin.transform, index);
+    }
+    
+    private void SpawnTextUI(Transform target, int index)
+    {
+        GameObject textClone = Instantiate(pinIndexTextPrefab);
+        textClone.transform.SetParent(textParent);
+        textClone.transform.localScale = Vector3.one;
+        textClone.GetComponent<FollowTargetOnScreen>().SetUp(target);
+        textClone.GetComponent<TextMeshProUGUI>().text = index.ToString();
     }
 }

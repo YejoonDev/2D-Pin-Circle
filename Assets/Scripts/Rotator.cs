@@ -11,4 +11,9 @@ public class Rotator : MonoBehaviour
     {
         transform.Rotate(rotateAngle, rotateSpeed * Time.deltaTime);
     }
+
+    public void Stop()
+    {
+        rotateSpeed = 0;
+    }
 }
