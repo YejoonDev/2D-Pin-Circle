@@ -78,6 +78,9 @@ public class StageController : MonoBehaviour
         Camera.main.backgroundColor = _clearBackgroundColor;
         rotator.RotateFast();
 
+        int index = PlayerPrefs.GetInt("StageLevel");
+        PlayerPrefs.SetInt("StageLevel", index+1);
+
         _audioSource.clip = audioGameClear;
         _audioSource.Play();
         
