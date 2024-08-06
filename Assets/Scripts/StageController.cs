@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 public class StageController : MonoBehaviour
 {
-    
+    [SerializeField] private MainMenuUI mainMenuUI;
     [SerializeField] private PinSpawner pinSpawner;
     [SerializeField] private int tPinCount;
     [SerializeField] private int sPinCount;
@@ -20,9 +20,13 @@ public class StageController : MonoBehaviour
     private readonly Vector3 _firstTPinPosition = Vector3.down * 2;
     public float TPinDistance { get; private set; } = 1;
 
+    [SerializeField] private AudioClip audioGameOver;
+    [SerializeField] private AudioClip audioGameClear;
+    private AudioSource _audioSource;
+
     private void Awake()
     {
-        
+        _audioSource = GetComponent<AudioSource>();
         pinSpawner.Setup();
         
         // Throwable Pin 생성
@@ -41,13 +45,6 @@ public class StageController : MonoBehaviour
         }
     }
 
-    public void GameOver()
-    {
-        IsGameOver = true;
-        Camera.main.backgroundColor = _failBackgroundColor;
-        rotator.Stop();
-    }
-
     public void DecreaseTPin()
     {
         tPinCount--;
@@ -55,6 +52,18 @@ public class StageController : MonoBehaviour
         {
             StartCoroutine(GameClear());
         }
+    }
+    
+    public void GameOver()
+    {
+        IsGameOver = true;
+        Camera.main.backgroundColor = _failBackgroundColor;
+        rotator.Stop();
+
+        _audioSource.clip = audioGameOver;
+        _audioSource.Play();
+        
+        StartCoroutine("StageExit", 0.5f);
     }
 
     IEnumerator GameClear()
@@ -68,5 +77,18 @@ public class StageController : MonoBehaviour
 
         Camera.main.backgroundColor = _clearBackgroundColor;
         rotator.RotateFast();
+
+        _audioSource.clip = audioGameClear;
+        _audioSource.Play();
+        
+        StartCoroutine("StageExit", 1f);
     }
+
+    private IEnumerator StageExit(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        mainMenuUI.StageExit();
+    }
+    
+    
 }

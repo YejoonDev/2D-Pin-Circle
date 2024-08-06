@@ -43,7 +43,7 @@ public class RectTransformMover : MonoBehaviour
             yield return null;
         }
 
-        _isMoved = true;
+        _isMoved = false;
         _onEndMoveEvent.Invoke();
         _onEndMoveEvent.RemoveListener(action);
     }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using Application = UnityEngine.Device.Application;
 
@@ -33,5 +34,15 @@ public class MainMenuUI : MonoBehaviour
 #else
         Application.Quit();
  #endif
+    }
+
+    public void StageExit()
+    {
+        menuPanel.MoveTo(AfterStageExitEvent, _activePosition);
+    }
+
+    private void AfterStageExitEvent()
+    {
+        SceneManager.LoadScene(0);
     }
 }

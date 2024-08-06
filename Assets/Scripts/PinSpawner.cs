@@ -22,11 +22,20 @@ public class PinSpawner : MonoBehaviour
     private List<Pin> _throwablePins;
     private readonly float _bottomAngle = 270;
 
+    private AudioSource _audioSource;
+    
+    public void Setup()
+    {
+        _audioSource = GetComponent<AudioSource>();
+        _throwablePins = new List<Pin>();
+    }
+    
     private void Update()
     {
         if (!stageController.IsGameStart || stageController.IsGameOver)
             return;
         
+        // 게임 진행 도중 플레이어가 마우스 클릭으로 핀 생성
         if (Input.GetMouseButtonDown(0) && _throwablePins.Count > 0)
         {
             _throwablePins[0].GetComponent<Pin>().AttachToTarget(target, _bottomAngle);
@@ -37,13 +46,11 @@ public class PinSpawner : MonoBehaviour
                 pin.MoveOneStep(stageController.TPinDistance);
             }
             stageController.DecreaseTPin();
+            _audioSource.Play();
         }
     }
 
-    public void Setup()
-    {
-        _throwablePins = new List<Pin>();
-    }
+    
     
     public void SpawnThrowablePin(Vector3 position, int index)
     {
